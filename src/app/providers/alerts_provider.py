@@ -21,3 +21,16 @@ def load_alerts(path="alerts.json") -> List[Alert]:
     except json.JSONDecodeError as e:
         print(f"[-] Erreur de décodage JSON dans {path}: {e}")
         return []  # Retourner une liste vide en cas d'erreur de parsing
+
+def save_alert(alert: Alert, path="alerts.json"):
+    """Sauvegarde une alerte dans le fichier alerts.json."""
+    try:
+        with open(path, "r") as f:
+            alerts = json.load(f)
+    except FileNotFoundError:
+        alerts = []
+
+    alerts.append(alert.to_dict())
+
+    with open(path, "w") as f:
+        json.dump(alerts, f, indent=2)

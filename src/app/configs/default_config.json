@@ -1,0 +1,14 @@
+{
+  "event_analyzer": {
+    "window_seconds": 30,
+    "critical_levels": ["CRITICAL"]
+  },
+  "alert_storage": {
+    "alerts_file_path": "alerts.json"
+  },
+  "reports": {
+    "output_directory": "reports",
+    "pdf_report_file": "report.pdf",
+    "html_report_file": "report.html"
+  }
+}
