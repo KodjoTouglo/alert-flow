@@ -2,3 +2,6 @@ fastapi==0.115.14
 reportlab==4.4.2
 fpdf==1.7.2
 pandas==2.3.0
+typer
+aiofiles
+matplotlib
