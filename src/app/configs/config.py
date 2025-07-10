@@ -1,22 +1,23 @@
-import json
-from pathlib import Path
-
-
 class Config:
-    def __init__(self, config_path="configs/default_config.json"):
-        self.config_path = Path(config_path)
-        self.config = self.load_config()
-
-    def load_config(self):
-        """Charge la configuration à partir du fichier JSON."""
-        if not self.config_path.exists():
-            raise FileNotFoundError(f"Le fichier de configuration '{self.config_path}' est introuvable.")
-
-        with open(self.config_path, "r") as f:
-            return json.load(f)
+    def __init__(self):
+        # Définition des valeurs par défaut
+        self.config = {
+            "event_analyzer": {
+                "window_seconds": 30,
+                "critical_levels": ["CRITICAL"]
+            },
+            "alert_storage": {
+                "alerts_file_path": "alerts.json"
+            },
+            "reports": {
+                "output_directory": "reports",
+                "pdf_report_file": "report.pdf",
+                "html_report_file": "report.html"
+            }
+        }
 
     def get(self, key: str, default=None):
-        """Permet d'accéder à une valeur dans la configuration."""
+        """Accéder à une valeur dans la configuration."""
         keys = key.split(".")
         config_value = self.config
         for key in keys:

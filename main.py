@@ -1,4 +1,5 @@
 import asyncio
+import os
 from datetime import datetime
 from pathlib import Path
 
@@ -18,8 +19,11 @@ app = typer.Typer()
 config = Config()
 
 @app.command()
-def run(file_path: str = "events.log"):
+def run(file_path: str = typer.Option("events.log", help="Le chemin du fichier log à traiter")):
     """Lancer le traitement asynchrone avec file pipeline"""
+    if not os.path.exists(file_path):
+        print(f"\033[35m[-] Le fichier spécifié '{file_path}' est introuvable.\033[35m")
+        return
     async def pipeline():
         queue = asyncio.Queue()
         analyzer = EventAnalyzer()
@@ -35,10 +39,13 @@ def run(file_path: str = "events.log"):
 def show_alerts():
     """Afficher les alertes sauvegardées"""
     alerts = load_alerts(config.get("alert_storage.alerts_file_path"))
+    if not alerts:
+        print("\033[35m[-] Aucune alerte trouvée.\033[35m")
+        return
     for a in alerts:
-        print(f"\n[-->] Alerte à {a.triggered_at}")
+        print(f"\033[32m\n[-->] Alerte à {a.triggered_at}\033[0m")
         for e in a.events:
-            print(f"[*]   {e.timestamp} | {e.level} | {e.message}")
+            print(f"\033[32m[*]   {e.timestamp} | {e.level} | {e.message}\033[0m")
 
 @app.command()
 def report():
@@ -62,7 +69,7 @@ def clean_reports():
     """Nettoyer les fichiers de rapport HTML/PDF/graphique"""
     reports_dir = Path(config.get("reports.output_directory"))
     if not reports_dir.exists():
-        print("[-] Aucun dossier 'reports' trouvé.")
+        print("\033[35m[-] Aucun dossier 'reports' trouvé.\033[35m")
         return
 
     count = 0
@@ -70,7 +77,10 @@ def clean_reports():
         if file.suffix in {".html", ".pdf", ".png"}:
             file.unlink()
             count += 1
-    print(f"[+] {count} fichier(s) supprimé(s) dans 'reports/'")
+    if count > 0:
+        print(f"\033[32m[+] {count} fichier(s) supprimé(s) dans 'reports/'\033[0m")
+    else:
+        print("\033[35m[-] Aucun fichier de rapport à supprimer.\033[35m")
 
 if __name__ == "__main__":
     app()

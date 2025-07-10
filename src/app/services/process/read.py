@@ -1,5 +1,7 @@
-import aiofiles
 import asyncio
+
+import aiofiles
+
 
 async def read_lines(file_path: str, queue: asyncio.Queue, delay: float = 2.0):
     """Lit un fichier ligne par ligne avec un délai simulé entre chaque ligne"""

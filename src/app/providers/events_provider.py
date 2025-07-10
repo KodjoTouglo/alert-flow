@@ -1,5 +1,7 @@
-from app.models.event_model import Event
 import json
+
+from app.models.event_model import Event
+
 
 def load_events(file_path="events.log") -> list[Event]:
     events = []

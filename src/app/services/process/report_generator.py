@@ -1,9 +1,9 @@
 import webbrowser
-
-from fpdf import FPDF
-import pandas as pd
-import matplotlib.pyplot as plt
 from pathlib import Path
+
+import matplotlib.pyplot as plt
+import pandas as pd
+from fpdf import FPDF
 
 from app.models.alerts_model import Alert
 from app.models.event_model import Event

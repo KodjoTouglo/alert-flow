@@ -1,36 +1,53 @@
-from typing import List
-from app.models.alerts_model import Alert
 import json
 from datetime import datetime
+from pathlib import Path
+from threading import Lock
+
+from app.models.alerts_model import Alert
 from .events_provider import Event
 
-def load_alerts(path="alerts.json") -> List[Alert]:
+# Création d'un verrou global
+lock = Lock()
+
+
+def load_alerts(path="alerts.json") -> list[Alert]:
     try:
         with open(path, "r") as f:
             data = f.read().strip()  # Lire et retirer les espaces blancs
             if not data:  # Vérifie si le fichier est vide
-                print(f"[-] Le fichier {path} est vide.")
+                print(f"\033[35m[-] Le fichier {path} est vide.\033[35m")
                 return []  # Retourner une liste vide si le fichier est vide
 
             alerts_data = json.loads(data)
             return [Alert(triggered_at=datetime.fromisoformat(d["triggered_at"]),
                           events=[Event(e) for e in d["events"]]) for d in alerts_data]
     except FileNotFoundError:
-        print(f"[-] Le fichier {path} est introuvable.")
+        print(f"\033[35m[-] Le fichier {path} est introuvable.\033[35m")
         return []  # Retourner une liste vide si le fichier n'existe pas
     except json.JSONDecodeError as e:
-        print(f"[-] Erreur de décodage JSON dans {path}: {e}")
+        print(f"\033[35m[-] Erreur de décodage JSON dans {path}: {e}\033[35m")
         return []  # Retourner une liste vide en cas d'erreur de parsing
 
-def save_alert(alert: Alert, path="alerts.json"):
-    """Sauvegarde une alerte dans le fichier alerts.json."""
+
+def save_alerts(alert, path="alerts.json"):
+    """Sauvegarde une alerte dans le fichier spécifié."""
     try:
-        with open(path, "r") as f:
-            alerts = json.load(f)
-    except FileNotFoundError:
-        alerts = []
+        # Acquérir le verrou avant de manipuler le fichier
+        with lock:
+            # Vérifier si le fichier existe déjà
+            if Path(path).exists():
+                with open(path, "r") as f:
+                    alerts = json.load(f)
+            else:
+                alerts = []
 
-    alerts.append(alert.to_dict())
+            # Ajouter la nouvelle alerte à la liste
+            alerts.append(alert.to_dict())
 
-    with open(path, "w") as f:
-        json.dump(alerts, f, indent=2)
+            # Sauvegarder les alertes dans le fichier
+            with open(path, "w") as f:
+                json.dump(alerts, f, indent=2)
+
+            print(f"\033[32m[+] Alerte sauvegardée à {path}\033[0m")
+    except Exception as e:
+        print(f"\033[35mErreur lors de la sauvegarde de l'alerte: {e}\033[35m")

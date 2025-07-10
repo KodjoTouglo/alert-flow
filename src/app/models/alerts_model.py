@@ -1,5 +1,7 @@
 from datetime import datetime
+
 from .event_model import Event
+
 
 class Alert:
     def __init__(self, triggered_at: datetime, events: list[Event]):
