@@ -18,34 +18,42 @@ app = typer.Typer()
 # Charger la configuration
 config = Config()
 
+
 @app.command()
 def run(file_path: str = typer.Option("events.log", help="Le chemin du fichier log à traiter")):
     """Lancer le traitement asynchrone avec file pipeline"""
     if not os.path.exists(file_path):
         print(f"\033[35m[-] Le fichier spécifié '{file_path}' est introuvable.\033[35m")
-        return
-    async def pipeline():
-        queue = asyncio.Queue()
-        analyzer = EventAnalyzer()
-        producer = asyncio.create_task(read_lines(file_path, queue))
-        consumer = asyncio.create_task(process_lines(queue, analyzer))
-        await producer
-        await queue.join()
-        consumer.cancel()
+        return  # Empêcher la sortie du programme avec SystemExit(2)
 
-    asyncio.run(pipeline())
+    try:
+        async def pipeline():
+            queue = asyncio.Queue()
+            analyzer = EventAnalyzer()
+            producer = asyncio.create_task(read_lines(file_path, queue))
+            consumer = asyncio.create_task(process_lines(queue, analyzer))
+            await producer
+            await queue.join()
+            consumer.cancel()
+
+        asyncio.run(pipeline())
+    except Exception as e:
+        print(f"\033[31m[-] Une erreur s'est produite : {e}\033[0m")
 
 @app.command()
 def show_alerts():
     """Afficher les alertes sauvegardées"""
-    alerts = load_alerts(config.get("alert_storage.alerts_file_path"))
-    if not alerts:
-        print("\033[35m[-] Aucune alerte trouvée.\033[35m")
-        return
-    for a in alerts:
-        print(f"\033[32m\n[-->] Alerte à {a.triggered_at}\033[0m")
-        for e in a.events:
-            print(f"\033[32m[*]   {e.timestamp} | {e.level} | {e.message}\033[0m")
+    try:
+        alerts = load_alerts(config.get("alert_storage.alerts_file_path"))
+        if not alerts:
+            print("\033[33m[-] Aucune alerte trouvée.\033[0m")
+        for a in alerts:
+            print(f"\033[32m\n[-->] Alerte à {a.triggered_at}\033[0m")
+            for e in a.events:
+                print(f"\033[32m[*]   {e.timestamp} | {e.level} | {e.message}\033[0m")
+    except Exception as e:
+        print(f"\033[31m[-] Une erreur s'est produite : {e}\033[0m")
+
 
 @app.command()
 def report():
