@@ -11,6 +11,16 @@ lock = Lock()
 
 
 def load_alerts(path="alerts.json") -> list[Alert]:
+    """
+        Charge les alertes depuis un fichier JSON.
+
+        Cette fonction lit le fichier spécifié, puis tente de décoder son contenu JSON
+        pour créer une liste d'objets `Alert`. Si le fichier est introuvable, vide ou
+        contient des erreurs de formatage, une liste vide est renvoyée.
+
+        :param path: str - Le chemin du fichier contenant les alertes (par défaut "alerts.json").
+        :return: List[Alert] - Une liste d'objets `Alert` chargés depuis le fichier.
+    """
     try:
         with open(path, "r") as f:
             data = f.read().strip()  # Lire et retirer les espaces blancs
@@ -30,7 +40,16 @@ def load_alerts(path="alerts.json") -> list[Alert]:
 
 
 def save_alerts(alert, path="alerts.json"):
-    """Sauvegarde une alerte dans le fichier spécifié."""
+    """
+        Sauvegarde une alerte dans un fichier JSON.
+
+        Cette fonction prend une alerte et l'ajoute au fichier spécifié. Si le fichier
+        existe déjà, les alertes existantes seront chargées et la nouvelle alerte y sera
+        ajoutée. Si le fichier n'existe pas, un nouveau fichier sera créé.
+
+        :param alert: Alert - L'alerte à sauvegarder.
+        :param path: str - Le chemin du fichier où les alertes seront sauvegardées (par défaut "alerts.json").
+    """
     try:
         # Acquérir le verrou avant de manipuler le fichier
         with lock:
