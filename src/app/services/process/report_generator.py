@@ -1,4 +1,5 @@
 import webbrowser
+from datetime import datetime
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -23,11 +24,15 @@ def plot_event_distribution(events: list[Event], output="reports/event_distribut
     Path(output).parent.mkdir(parents=True, exist_ok=True)
     plt.savefig(output)
 
-def generate_pdf(events: list[Event], alerts: list[Alert], graph_path="reports/event_distribution.png", output="reports/report.pdf"):
+def generate_pdf(events: list[Event], alerts: list[Alert], graph_path="reports/event_distribution.png", output_dir="reports"):
     total = len(events)
     critical = sum(1 for e in events if e.level == "CRITICAL")
 
     plot_event_distribution(events, graph_path)
+
+    # Générer un nom de fichier basé sur la date actuelle
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    output = f"{output_dir}/report_{timestamp}.pdf"
 
     pdf = FPDF()
     pdf.add_page()
@@ -74,7 +79,7 @@ def generate_pdf(events: list[Event], alerts: list[Alert], graph_path="reports/e
 
     pdf.image(graph_path, w=180)
     pdf.output(output)
-    print(f"[+] Rapport PDF généré : {output}")
+    print(f"\033[32m[+] Rapport PDF généré : {output}\033[0m")
 
 def generate_html(
     events: list[Event],
